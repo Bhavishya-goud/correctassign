@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        body{
+            display: flex;
+            flex-direction: column;
+            background-color: rgb(8, 0, 28);
+            
+        
+            justify-content: center;
+            align-items: center;
+            
+        }
+        .upload{
+            background-color: rgb(23, 1, 95);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            margin: 10px;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 18px;
+            width: 300px;
+color: #ded9f5;
+            box-shadow:0px 0px 10px rgb(188, 191, 192);
+        }
+        .upload input,.first input{
+            width: 200px;
+            height: 30px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+
+        }
+       
+        .upload button,.first button,.second button{
+          width: 80px;
+            height: 30px;
+            border: none;
+            background-color: rgb(147, 125, 245);
+            border-radius: 10px;
+        }
+        section{
+            display: flex;
+            flex-direction: row;
+           height: 400px;
+            width: 100%;
+        }
+        .first{
+          
+          grid-template-columns: repeat(1fr,3);
+          width: 50%;
+          height: auto;
+         
+          border-top: 2px solid  rgb(176, 178, 245);
+        }
+       
+        .second{
+            width: 50%;
+            height: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border-top: 2px solid  rgb(176, 178, 245);
+        
+          
+        }
+        .second button{
+            margin: 10px;
+            width: 150px;
+            padding: 10px;
+        }
+        .first .selements{
+            background-color: rgb(197, 190, 236);
+            height: 100%;
+            margin: 10px;
+            padding: 10px;
+            color: black;
+            border-radius: 10px;
+        }
+        header{
+            margin: 10px;
+            background-color: rgb(180, 171, 248);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+            align-items: center;
+            padding: 10px;
+            border-radius: 10px;
+        }
+        .second .allelements{
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+ grid-template-rows: repeat(4,1fr);
+        }
+        .single,.sele{
+            margin: 5px;
+            padding: 6px;
+            background-color: rgb(194, 157, 250);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border: 2px dashed rgb(120, 75, 245);
+        }
+        img{
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin: 10px;
+        }
+      
+    </style>
+</head>
+<body>
+    <div class="upload">
+        <label for="inurl">enter your github url</label>
+    <input type="url"  id="inurl">
+    <button class="submit">submit</button>
+    </div>
+    <section>
+    <div class="first">
+        <header>
+            <label for="specificuser">enter specific username</label>
+    <input type="text" id="specificuser">
+    <button class="search">search</button>
+        </header>
+    <div class="selements">
+        <h5>INFO</h5>
+    </div>
+    </div>
+    <div class="second">
+    <button class="getall">get all</button>
+    <div class="allelements"></div>
+    </div>
+    </section>
+    <script>
+      let div=document.querySelector('.allelements')
+      let div2=document.querySelector('.selements')
+      let button=document.querySelector('.submit')
+      button.onclick=async ()=>{
+        let input=document.querySelector('#inurl').value;
+        const urldata={
+            url:input
+        };
+        const res=await fetch('/',{
+             method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json' // Tells backend to expect JSON
+                    },
+                    body:JSON.stringify(urldata)
+        });
+        const data=await res.json();
+        document.querySelector('#inurl').innerText=' ';
+        
+        document.querySelector('#inurl').value=' ';
+        if(data.error){
+            alert('sorry,not analyzed');
+        }
+        else{
+             alert(' analyzed');
+        }
+        
+      }
+      
+   document.querySelector('.getall').onclick=async()=>{
+    div.replaceChildren();
+     const response=await fetch('/all');
+     const res=await response.json()
+     if(res.error){
+        alert('failed to fetch')
+     }else{
+        const resdata=res.data;
+        resdata.forEach(element => {
+            let niv=document.createElement('div')
+            niv.classList.add('sele');
+            let p=document.createElement('h3');
+            p.innerText=`${element.username}`
+            let g=document.createElement('p');
+           g.innerText=`-${element.active?'active':'not active'}`;
+           let i=document.createElement('img')
+           i.src=element.avatar
+            niv.appendChild(p);
+            niv.appendChild(g);
+            niv.appendChild(i)
+            div.appendChild(niv);
+        });
+     }
+   }
+
+   document.querySelector('.search').onclick=async ()=>{
+    div2.replaceChildren()
+    let un=document.querySelector('#specificuser').value;
+    const response=await fetch(`/${un}`)
+    const result=await response.json();
+    if(result.error){
+        alert('failed to fetch')
+    }else{
+        result.data.forEach(e=>{
+            let p=document.createElement('p');
+            p.innerHTML=`<h4>PROFILE DETAILS:</h4><br> <h3>USER NAME-${e.username}</h3><br><img src=${e.avatar}><br> NO. OF REP-${e.repcount}<br>FOLLOWERS-${e.followers}<br>FOLLOWING-${e.following_count}<br>TWITTER-${e.isAvailTwit?'available':'not available'}<br>IS ACTIVE-${e.active?'active':'not active'}<br>LAST EDITED-${e.last_active} ago`;
+            p.classList.add('single');
+       
+            div2.appendChild(p);
+        })
+        document.querySelector('#specificuser').innerText=' ';
+       
+    }
+   }
+
+    </script>
+</body>
+</html>
